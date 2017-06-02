@@ -1,6 +1,9 @@
+{-# OPTIONS_GHC -XFlexibleInstances #-}
+{-# OPTIONS_GHC -XGeneralizedNewtypeDeriving #-}
 module Test.AssertH where
 
-import qualified Test.HUnit (Assertion, Test, assertEqual, assertBool)
+import qualified Test.HUnit (Assertion, Test(..), assertEqual, assertBool, runTestTT)
+import qualified Test.HUnit.Base (Counts)
 import qualified Control.Monad.Writer (WriterT, tell, execWriter)
 import qualified Control.Applicative (Applicative)
 import qualified Control.Monad.Trans.Class (MonadTrans)
@@ -55,17 +58,16 @@ integerIsEqualToSuccess :: MockAssertion Data.Functor.Identity.Identity ()
 integerIsEqualToSuccess = assertThat 2 `isEqualTo` 3
 
 
-integerAssertOfDifferentValuesHasProperMessage :: Test.HUnit.Assertion 
+integerAssertOfDifferentValuesHasProperMessage :: Test.HUnit.Test 
 integerAssertOfDifferentValuesHasProperMessage = Test.HUnit.TestCase $ do 
                                     let failedMessage = Control.Monad.Writer.execWriter $ runMessage integerIsEqualToFailing 
                                     Test.HUnit.assertEqual "" "2 is not equal to 3" failedMessage
 
-
+allTests :: Test.HUnit.Test
 allTests = Test.HUnit.TestList [integerAssertOfDifferentValuesHasProperMessage]
 
-main :: IO ()
-main = do 
-           runTestTT allTests
+main :: IO Test.HUnit.Base.Counts
+main = Test.HUnit.runTestTT allTests
 
                                                       
 
